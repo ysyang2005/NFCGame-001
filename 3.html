@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>時空信物 - 字謎試煉</title>
+    <style>
+        :root {
+            --paper: #e6d5b8;
+            --ink: #2a1f1a;
+            --highlight: #8b2635;
+            --border: #5d4037;
+            --gold: #d4af37;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #050505;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            /* 統一字體堆疊 */
+            font-family: "BiauKai", "Kaiti TC", "Kaiti", "STKaiti", serif;
+            padding: 40px 20px;
+        }
+
+        /* --- 統一的矩形信紙容器 --- */
+        .parchment {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            background: var(--paper);
+            background-image: url('https://www.transparenttextures.com/patterns/old-map.png');
+            padding: 50px 35px;
+            border: 2px solid var(--border);
+            border-radius: 2px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 遊戲化元素：進度與標籤 --- */
+        .quest-meta {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(93, 64, 55, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .step-tag {
+            font-size: 12px;
+            color: var(--highlight);
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: rgba(93, 64, 55, 0.3);
+        }
+        .dot.active { background: var(--highlight); box-shadow: 0 0 5px var(--highlight); }
+
+        /* --- 詩詞區域：墨染效果 --- */
+        .poem-box {
+            text-align: center;
+            margin-bottom: 40px;
+            filter: url(#ink-bleed);
+        }
+
+        .poem-line {
+            font-size: 26px;
+            color: var(--ink);
+            margin: 15px 0;
+            letter-spacing: 6px;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease forwards;
+        }
+
+        .highlight-word {
+            color: var(--highlight);
+            font-weight: bold;
+            position: relative;
+        }
+
+        /* 詩詞逐行顯現動畫 */
+        .poem-line:nth-child(1) { animation-delay: 0.5s; }
+        .poem-line:nth-child(2) { animation-delay: 1.5s; }
+        .poem-line:nth-child(3) { animation-delay: 2.5s; }
+        .poem-line:nth-child(4) { animation-delay: 3.5s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); filter: blur(5px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        /* --- 交互區域 --- */
+        .interaction {
+            width: 100%;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 1s forwards 4.5s;
+        }
+
+        .hint-text {
+            font-family: "STFangsong", "FangSong", serif;
+            font-size: 14px;
+            color: #5a4b3f;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .answer-input {
+            width: 180px;
+            padding: 12px;
+            font-size: 20px;
+            font-family: inherit;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid var(--border);
+            color: var(--ink);
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+        }
+
+        .answer-input:focus { outline: none; border-color: var(--highlight); background: white; }
+
+        /* 火漆印章提交按鈕 */
+        .seal-submit {
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin: 0 auto;
+            width: 70px;
+            height: 70px;
+            background: var(--highlight);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--paper);
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .seal-submit:active { transform: scale(0.9) rotate(-10deg); }
+
+        .result-msg {
+            margin-top: 15px;
+            font-size: 14px;
+            height: 20px;
+            transition: 0.3s;
+        }
+        .error { color: var(--highlight); }
+        .success { color: #2e7d32; }
+
+    </style>
+</head>
+<body>
+
+    <div class="parchment">
+        <div class="quest-meta">
+            <span class="step-tag">◈ 第一卷：字謎之煉</span>
+            <div class="progress-dots">
+                <div class="dot active"></div>
+                <div class="dot active"></div>
+                <div class="dot active"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+        
+        <div class="poem-box">
+            <div class="poem-line"><span class="highlight-word">左</span>有<span class="highlight-word">佳人</span>立</div>
+            <div class="poem-line"><span class="highlight-word">右</span>伴<span class="highlight-word">良</span>人行</div>
+            <div class="poem-line"><span class="highlight-word">此女</span>原非凡</div>
+            <div class="poem-line">策<span class="highlight-word">馬</span>越千層</div>
+        </div>
+
+        <div class="interaction">
+            <p class="hint-text">
+                語出閩南，意指何方神聖？<br>
+                請於下方輸入謎底以破卷。
+            </p>
+            
+            <input type="text" class="answer-input" id="answerField" placeholder="謎底" maxlength="2">
+            
+            <div class="seal-submit" onclick="verify()">
+                <span>確認<br>破局</span>
+            </div>
+            
+            <div id="msg" class="result-msg"></div>
+        </div>
+    </div>
+
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <filter id="ink-bleed">
+                <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+            </filter>
+        </defs>
+    </svg>
+
+    <script>
+        function verify() {
+            const val = document.getElementById('answerField').value.trim();
+            const msg = document.getElementById('msg');
+            
+            if (val === '娘媽') {
+                msg.textContent = '◈ 破解成功，時空裂隙開啟...';
+                msg.className = 'result-msg success';
+                
+                // 震動反饋
+                if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+                
+                setTimeout(() => {
+                    location.href = '4.html'; 
+                }, 1500);
+            } else {
+                msg.textContent = '◈ 謎底未合，再思量。';
+                msg.className = 'result-msg error';
+                document.getElementById('answerField').value = '';
+                // 輕微抖動動畫
+                document.querySelector('.parchment').animate([
+                    { transform: 'translateX(-5px)' },
+                    { transform: 'translateX(5px)' }
+                ], { duration: 100, iterations: 3 });
+            }
+        }
+
+        // 回車支援
+        document.getElementById('answerField').addEventListener('keypress', e => {
+            if (e.key === 'Enter') verify();
+        });
+    </script>
+</body>
+</html>

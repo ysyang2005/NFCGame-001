@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>视频静音+BGM独立控制+永久循环</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { 
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 视频：黑屏淡入 + 全屏自适应 + 永久静音无控制 */
+        video {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1.2s ease-out;
+        }
+        video.show { opacity: 1; }
+
+        /* ========== 仅保留：左上角BGM独立音量按钮 ========== */
+        #bgmBtn {
+            position: fixed;
+            top: 20px; 
+            left: 20px;
+            z-index: 9999;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        #bgmBtn:hover { 
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.05); 
+        }
+
+        /* 点击开始游戏文字：仅暂停时显示+闪烁 */
+        #tipText {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9998;
+            color: #fff;
+            font-size: 22px;
+            letter-spacing: 2px;
+            opacity: 0;
+            pointer-events: none;
+            cursor: pointer;
+            transition: opacity 0.3s ease-out;
+        }
+        #tipText.show { 
+            opacity: 1; 
+            pointer-events: auto;
+            animation: flicker 1.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes flicker { 
+            0% { opacity: 1; } 
+            100% { opacity: 0.3; } 
+        }
+
+        /* 隐藏BGM控件，页面整洁 */
+        #bgm { display: none; }
+    </style>
+</head>
+<body>
+    <!-- 仅保留：BGM独立控制按钮 -->
+    <button id="bgmBtn">🔇 關閉BGM</button>
+    <div id="tipText">點擊開始遊戲</div>
+    
+    <!-- 视频：默认静音，无音量开关 -->
+    <video id="video1" src="视频1.mp4" autoplay muted playsinline oncanplay="this.classList.add('show')"></video>
+    <!-- BGM：永久循环，独立播放 -->
+    <audio id="bgm" src="1.mp3" loop preload="auto" volume="1">
+
+    <script>
+        const video1 = document.getElementById('video1');
+        const bgmBtn = document.getElementById('bgmBtn');
+        const tipText = document.getElementById('tipText');
+        const bgm = document.getElementById('bgm');
+        const TARGET_PAUSE_TIME = 7.12; // 7.12秒精准暂停
+        let isPausedAtTarget = false;
+        let isBgmMuted = false; // BGM默认不静音（有声音）
+
+        // ========== 核心：BGM独立控制逻辑（和视频完全分离） ==========
+        bgmBtn.addEventListener('click', () => {
+            isBgmMuted = !isBgmMuted;
+            bgm.muted = isBgmMuted;
+            // 按钮文字切换
+            bgmBtn.innerHTML = isBgmMuted ? '▶️ 開啟BGM' : '🔇 關閉BGM';
+            // 静音状态下暂停BGM，开启时恢复播放
+            if(isBgmMuted) {
+                bgm.pause();
+            } else {
+                bgm.play().catch(() => { bgm.play(); }); // 强制播放兜底
+            }
+        });
+
+        // ========== 视频核心功能：7.12秒精准暂停（无音量控制） ==========
+        video1.addEventListener('timeupdate', function() {
+            if(!isPausedAtTarget && !video1.paused && video1.currentTime >= TARGET_PAUSE_TIME){
+                video1.pause();
+                video1.currentTime = TARGET_PAUSE_TIME; // 强制锁帧精准定位
+                isPausedAtTarget = true;
+                tipText.classList.add('show'); // 仅此时显示文字
+                this.removeEventListener('timeupdate', arguments.callee);
+            }
+        });
+
+        // ========== 点击文字继续播放视频 + 强制触发BGM（解决浏览器拦截） ==========
+        tipText.addEventListener('click', () => {
+            if(isPausedAtTarget){
+                tipText.classList.remove('show');
+                video1.play(); // 视频无缝继续播放
+                // 用户交互后强制播放BGM，百分百生效
+                if(!isBgmMuted && bgm.paused) {
+                    bgm.play().then(()=>{}).catch(()=>{ bgm.play(); });
+                }
+                isPausedAtTarget = false;
+            }
+        });
+
+        // ========== 兜底：点击页面任意位置触发BGM播放（防止浏览器拦截） ==========
+        document.body.addEventListener('click', () => {
+            if(!isBgmMuted && bgm.paused) {
+                bgm.play();
+            }
+        }, { once: true }); // 仅触发一次，不冗余
+
+        // ========== 视频播放完毕自动跳转1.html ==========
+        video1.addEventListener('ended', () => {
+            window.location.href = "1.html";
+        });
+
+        // ========== 页面加载后自动尝试播放BGM ==========
+        window.addEventListener('load', () => {
+            bgm.volume = 1; // BGM音量拉满
+            bgm.play().catch(()=>{}); // 失败无报错
+        });
+    </script>
+</body>
+</html>

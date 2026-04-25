@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>時空信物 - 秘卷啟示</title>
+    <style>
+        :root {
+            --paper: #e6d5b8;
+            --ink: #2a1f1a;
+            --highlight: #8b2635;
+            --border: #5d4037;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #050505;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            font-family: "BiauKai", "Kaiti TC", "Kaiti", "STKaiti", serif;
+            padding: 40px 20px;
+        }
+
+        /* --- 統一的長方形信紙容器 --- */
+        .parchment {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            background: var(--paper);
+            background-image: url('https://www.transparenttextures.com/patterns/old-map.png');
+            padding: 50px 35px;
+            border: 2px solid var(--border);
+            border-radius: 2px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 1.2s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 遊戲進度標籤 */
+        .quest-status {
+            width: 100%;
+            font-family: "Songti TC", serif;
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: var(--highlight);
+            text-align: center;
+            border-bottom: 1px solid rgba(93, 64, 55, 0.2);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        /* --- 揭曉文字動畫 --- */
+        .reveal-text {
+            position: absolute;
+            top: 40%;
+            width: 80%;
+            text-align: center;
+            filter: url(#ink-bleed);
+            animation: slideUpOut 2s ease forwards 5s;
+            z-index: 5;
+        }
+
+        .reveal-line {
+            font-size: 26px;
+            color: var(--ink);
+            margin: 10px 0;
+            opacity: 0;
+            letter-spacing: 6px;
+            font-weight: 900;
+            animation: fadeInUp 2.5s ease forwards;
+        }
+
+        .reveal-line:nth-child(1) { animation-delay: 1s; }
+        .reveal-line:nth-child(2) { animation-delay: 3s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        @keyframes slideUpOut {
+            to { opacity: 0; transform: translateY(-80px); visibility: hidden; }
+        }
+
+        /* --- 主內容區域 --- */
+        .main-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            opacity: 0;
+            animation: fadeInBody 2s ease forwards 7s;
+        }
+
+        @keyframes fadeInBody { to { opacity: 1; } }
+
+        .image-frame {
+            width: 100%;
+            max-width: 280px;
+            text-align: center;
+        }
+
+        .image-frame img {
+            width: 100%;
+            border: 1px solid var(--border);
+            padding: 4px;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .intro-text {
+            font-family: "STFangsong", "FangSong", serif;
+            color: #4a3b2f;
+            font-size: 15px;
+            line-height: 2;
+            text-align: justify;
+            width: 100%;
+        }
+
+        .intro-text b { color: var(--highlight); }
+
+        /* 按鈕容器 */
+        .next-btn-container {
+            margin-top: 30px;
+            opacity: 0;
+            animation: fadeInBody 2s ease forwards 8.5s;
+        }
+
+        .seal-btn {
+            cursor: pointer;
+            width: 80px; /* 略微调整宽度以容纳四个中文字 */
+            height: 80px;
+            background: var(--highlight);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--paper);
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+            text-align: center;
+            padding: 10px;
+            line-height: 1.4;
+        }
+
+        .seal-btn:active { transform: scale(0.9); }
+
+    </style>
+</head>
+<body>
+
+    <div class="parchment">
+        <div class="quest-status">◈ 秘卷啟示：娘媽之秘 ◈</div>
+        
+        <div class="reveal-text">
+            <div class="reveal-line">謎底：娘媽</div>
+            <div class="reveal-line">護佑鏡海之「媽祖」</div>
+        </div>
+
+        <div class="main-content">
+            <div class="image-frame">
+                <img src="1.jpg" alt="媽祖聖像" onerror="this.src='https://via.placeholder.com/300x400/e6d5b8/5d4037?text=%E5%A6%BD%E7%A5%96%E8%81%96%E5%83%8F'">
+            </div>
+            <div class="intro-text">
+                <b>媽祖</b>，又稱天后、娘媽，是澳門與沿海地區最重要的海上守護神。
+                <br><br>
+                在澳門的歷史長河中，娘媽信仰深植於<b>鏡海</b>（澳門古稱）的每一寸浪花。她慈悲救難，守望平安，是這段冒險中最神聖的「時空信物」。
+            </div>
+        </div>
+
+        <div class="next-btn-container" onclick="location.href='5.html'">
+            <div class="seal-btn">繼續<br>探索</div>
+        </div>
+    </div>
+
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <filter id="ink-bleed">
+                <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+            </filter>
+        </defs>
+    </svg>
+
+</body>
+</html>

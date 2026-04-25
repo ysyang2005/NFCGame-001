@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>時空信物 - 啟程</title>
+    <style>
+        :root {
+            --paper: #e6d5b8;
+            --ink: #2a1f1a;
+            --highlight: #8b2635;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #050505;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            /* 優化：優先調用具書法質感的楷體，增加古風底蘊 */
+            font-family: "BiauKai", "Kaiti TC", "Kaiti", "STKaiti", "PingFang TC", serif;
+        }
+
+        /* 模擬提燈光效 */
+        .lantern-light {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), 
+                        rgba(230, 213, 184, 0.15) 0%, 
+                        rgba(0,0,0,0.95) 50%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 信札主體 */
+        .parchment {
+            position: relative;
+            width: 85vw;
+            max-width: 400px;
+            min-height: 550px;
+            background: var(--paper);
+            background-image: url('https://www.transparenttextures.com/patterns/old-map.png');
+            padding: 50px 30px;
+            /* 邊緣不規則切割效果 */
+            clip-path: polygon(2% 0%, 98% 2%, 100% 98%, 0% 100%, 3% 50%);
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.98) translateY(10px);
+            animation: letterAppear 2s ease-out forwards;
+        }
+
+        @keyframes letterAppear {
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* 墨水暈染文字動畫 */
+        .ink-text {
+            color: var(--ink);
+            text-align: center;
+            opacity: 0;
+            filter: url(#ink-bleed); 
+            animation: inkSpread 3s ease-in forwards;
+        }
+
+        @keyframes inkSpread {
+            0% { opacity: 0; filter: blur(10px) brightness(2); }
+            100% { opacity: 1; filter: blur(0px) brightness(1); }
+        }
+
+        h1 {
+            /* 優化：標題使用木刻風格強烈的宋體/明體 */
+            font-family: "Songti TC", "STSong", "SimSun", serif;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 12px;
+            margin-bottom: 40px;
+            color: var(--ink);
+            /* 增加細微墨漬陰影 */
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+        }
+
+        .quote {
+            /* 優化：核心詩句採用手寫感楷體 */
+            font-family: "Kaiti TC", "Kaiti", "STKaiti", serif;
+            font-size: 20px;
+            line-height: 2.2;
+            margin-bottom: 40px;
+            color: var(--highlight);
+            font-weight: bold;
+        }
+
+        .main-story {
+            /* 優化：正文改用仿宋體，營造典籍般的精緻感 */
+            font-family: "STFangsong", "FangSong", serif;
+            font-size: 16px;
+            line-height: 2.4;
+            color: #4a3b2f;
+            text-align: justify;
+            margin-bottom: 50px;
+        }
+
+        /* 交互按鈕：印章風格 */
+        .seal-btn {
+            /* 優化：按鈕字體與標題呼應 */
+            font-family: "Songti TC", "STSong", serif;
+            padding: 12px 35px;
+            border: 1px solid var(--ink);
+            background: transparent;
+            color: var(--ink);
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            cursor: pointer;
+            transition: 0.5s;
+            text-decoration: none;
+            opacity: 0;
+            animation: fadeIn 2s forwards 4s;
+        }
+
+        .seal-btn:hover {
+            background: var(--ink);
+            color: var(--paper);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        /* 火漆裝飾 */
+        .wax-seal {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--highlight);
+            border-radius: 50%;
+            opacity: 0.6;
+            transform: rotate(-20deg);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="lantern-light" id="light"></div>
+
+    <div class="parchment">
+        <div class="ink-text" style="animation-delay: 1s;">
+            <h1>啟封信札</h1>
+        </div>
+
+        <div class="ink-text" style="animation-delay: 2s;">
+            <p class="quote">
+                「作為後來人，<br>
+                尋找閩南文化在澳門的故事。」
+            </p>
+        </div>
+
+        <div class="ink-text" style="animation-delay: 3s;">
+            <div class="main-story">
+                在紅磚堆砌的記憶裡，<br>
+                在鏡海潮起潮落的餘溫中，<br>
+                每一份信物，都是一段遺落的時空。<br>
+                這趟旅程，由你開啟。
+            </div>
+        </div>
+
+        <a href="2.html" class="seal-btn">入卷尋蹤</a>
+        <div class="wax-seal"></div>
+    </div>
+
+    <svg style="display:none;">
+        <defs>
+            <filter id="ink-bleed">
+                <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" />
+            </filter>
+        </defs>
+    </svg>
+
+    <script>
+        window.addEventListener('mousemove', e => {
+            document.body.style.setProperty('--x', e.clientX + 'px');
+            document.body.style.setProperty('--y', e.clientY + 'px');
+        });
+
+        window.addEventListener('touchmove', e => {
+            document.body.style.setProperty('--x', e.touches[0].clientX + 'px');
+            document.body.style.setProperty('--y', e.touches[0].clientY + 'px');
+        });
+    </script>
+</body>
+</html>

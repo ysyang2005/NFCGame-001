@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>時空信物 - 秘卷尋蹤</title>
+    <style>
+        :root {
+            --paper: #e6d5b8;
+            --ink: #2a1f1a;
+            --highlight: #8b2635;
+            --border: #5d4037;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #050505;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            font-family: "BiauKai", "Kaiti TC", "Kaiti", "STKaiti", serif;
+            padding: 40px 20px;
+        }
+
+        /* --- 四四方方矩形信紙 --- */
+        .parchment {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            background: var(--paper);
+            background-image: url('https://www.transparenttextures.com/patterns/old-map.png');
+            padding: 45px 30px;
+            border: 2px solid var(--border);
+            border-radius: 2px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 1.2s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 遊戲化進度提示 */
+        .quest-status {
+            font-family: "Songti TC", serif;
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: var(--highlight);
+            margin-bottom: 20px;
+            opacity: 0.8;
+            font-weight: bold;
+        }
+
+        /* 標題：古體宋體 + 墨染濾鏡 */
+        .task-title {
+            font-family: "Songti TC", "STSong", "SimSun", serif;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--ink);
+            text-align: center;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            filter: url(#ink-bleed);
+            line-height: 1.4;
+        }
+
+        /* 地圖區域：矩形嵌套 */
+        #map-wrapper {
+            width: 100%;
+            height: 300px;
+            border: 1px solid var(--border);
+            position: relative;
+            background: #d2c1a5;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        #map-container {
+            width: 100%;
+            height: 100%;
+            /* 古董地圖濾鏡 */
+            filter: sepia(0.5) contrast(1.1) saturate(0.8);
+        }
+
+        /* 導航提示：仿宋體 */
+        .nav-hint {
+            font-family: "STFangsong", "FangSong", serif;
+            font-size: 14px;
+            color: #5a4b3f;
+            text-align: center;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        /* 遊戲化按鈕：火漆印章交互 */
+        .seal-btn-container {
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .seal-btn-container:active { transform: scale(0.9); }
+
+        .wax-seal {
+            width: 75px;
+            height: 75px;
+            background: var(--highlight);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--paper);
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            border: 2px solid rgba(255,255,255,0.1);
+            animation: pulse-ring 2s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(139, 38, 53, 0.6); }
+            70% { box-shadow: 0 0 0 15px rgba(139, 38, 53, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 38, 53, 0); }
+        }
+
+    </style>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=tFRn4D9WTfZk7vjkpXHW20TwMWPaKcoj"></script>
+</head>
+<body>
+
+    <div class="parchment">
+        <div class="quest-status">◈ 探索進度：第一卷 ◈</div>
+        
+        <div class="task-title">尋訪「澳門科技大學」<br>解密時空信物</div>
+
+        <div id="map-wrapper">
+            <div id="map-container"></div>
+        </div>
+
+        <div class="nav-hint">
+            觸碰卷中地圖 開啟方位導引<br>
+            抵達坐標點後 點擊下方印章
+        </div>
+
+        <div class="seal-btn-container" onclick="handleSave()">
+            <div class="wax-seal">入卷<br>存檔</div>
+        </div>
+    </div>
+
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <filter id="ink-bleed">
+                <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" />
+            </filter>
+        </defs>
+    </svg>
+
+    <script type="text/javascript">
+        const target = {
+            name: "澳門科技大學",
+            lng: 113.577148,
+            lat: 22.154733
+        };
+
+        function initMap() {
+            if (typeof BMap === 'undefined') return;
+            const map = new BMap.Map("map-container");
+            const pt = new BMap.Point(target.lng, target.lat);
+            map.centerAndZoom(pt, 17); 
+
+            // 簡約暗色樣式
+            map.setMapStyle({
+                styleJson: [
+                    { "featureType": "all", "elementType": "all", "stylers": { "lightness": -15, "saturation": -100 } }
+                ]
+            });
+
+            const marker = new BMap.Marker(pt);
+            map.addOverlay(marker);
+            
+            const nav = () => {
+                const isMobile = /iPhone|Android|iPad/i.test(navigator.userAgent);
+                if (isMobile) {
+                    window.location.href = `baidumap://map/direction?destination=name:${encodeURIComponent(target.name)}|latlng:${target.lat},${target.lng}&mode=driving`;
+                } else {
+                    window.open(`https://map.baidu.com/?newmap=1&ie=utf-8&s=s%26wd%3D${encodeURIComponent(target.name)}`, "_blank");
+                }
+            };
+
+            marker.addEventListener("click", nav);
+            document.getElementById('map-wrapper').addEventListener("click", nav);
+        }
+
+        function handleSave() {
+            // 點擊反饋
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            // 延遲跳轉增加儀式感
+            document.querySelector('.parchment').style.opacity = '0.5';
+            setTimeout(() => {
+                location.href = '3.html';
+            }, 500);
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>

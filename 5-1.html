@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>時空信物 - 突破重圍</title>
+    <style>
+        :root {
+            --paper: #e6d5b8;
+            --ink: #2a1f1a;
+            --highlight: #8b2635;
+            --gold: #d4af37;
+            --border: #5d4037;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #050505;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: "BiauKai", "Kaiti TC", "Kaiti", "STKaiti", serif;
+        }
+
+        .parchment {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            background: var(--paper);
+            background-image: url('https://www.transparenttextures.com/patterns/old-map.png');
+            padding: 50px 25px;
+            border: 2px solid var(--border);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 85vh;
+        }
+
+        .congrats-header {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease forwards;
+        }
+
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .congrats-title { font-size: 26px; color: var(--highlight); letter-spacing: 4px; margin-bottom: 8px; }
+        .congrats-subtitle { font-size: 13px; color: var(--ink); opacity: 0.8; }
+
+        /* --- 修正後的卡牌容器 --- */
+        .card-fan-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            perspective: 1000px;
+        }
+
+        /* 外部包裝器：負責位置與扇形角度，不參與 Hover 縮放，解決跳動關鍵 */
+        .card-wrapper {
+            position: absolute;
+            bottom: 50px;
+            width: 140px;
+            height: 220px;
+            transform-origin: bottom center;
+            transition: z-index 0s;
+            opacity: 0;
+        }
+
+        /* 內部卡牌：負責視覺表現與縮放 */
+        .reward-card {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border: 3px solid var(--gold);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        /* 動畫延遲與初始位置 */
+        .w1 { z-index: 10; animation: fanLeft 1s ease forwards 0.5s; }
+        .w2 { z-index: 20; animation: fanCenter 1s ease forwards 0.8s; }
+        .w3 { z-index: 10; animation: fanRight 1s ease forwards 1.1s; }
+
+        @keyframes fanLeft { from { opacity: 0; transform: rotate(0); } to { opacity: 1; transform: rotate(-18deg) translateX(-90px); } }
+        @keyframes fanCenter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fanRight { from { opacity: 0; transform: rotate(0); } to { opacity: 1; transform: rotate(18deg) translateX(90px); } }
+
+        /* 修正後的 Hover 邏輯：作用於 wrapper 以保持穩定 */
+        .card-wrapper:hover {
+            z-index: 100;
+        }
+
+        .card-wrapper:hover .reward-card {
+            transform: scale(1.15) translateY(-30px) rotate(0); /* 重置旋轉讓卡牌變正 */
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            border-color: var(--highlight);
+        }
+
+        .card-img { width: 100%; height: 120px; object-fit: cover; border-bottom: 1px solid var(--gold); }
+        .card-content { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; text-align: left; }
+        .coupon-label { font-size: 10px; color: var(--highlight); font-weight: bold; }
+        .coupon-title { font-size: 13px; color: var(--ink); margin-top: 5px; font-weight: bold; line-height: 1.4; }
+
+        .footer-hint {
+            font-size: 12px;
+            color: #7a6a5a;
+            line-height: 1.8;
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 2s;
+        }
+
+        .seal-btn-container {
+            margin-top: auto;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 2.5s;
+        }
+
+        .seal-btn {
+            cursor: pointer;
+            width: 65px; height: 65px;
+            background: var(--highlight);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--paper); font-size: 12px; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="parchment">
+        <div class="congrats-header">
+            <h1 class="congrats-title">突破重圍</h1>
+            <p class="congrats-subtitle">恭喜突破第一個謎題：娘媽之秘</p>
+        </div>
+
+        <div class="card-fan-container">
+            <div class="card-wrapper w1">
+                <div class="reward-card" onclick="alert('已領取 2.jpg 獎勵')">
+                    <img src="2.jpg" class="card-img" alt="獎勵1" onerror="this.src='https://via.placeholder.com/140x120?text=2.jpg'">
+                    <div class="card-content">
+                        <span class="coupon-label">犒賞 ‧ 壹</span>
+                        <h3 class="coupon-title">古道尋幽<br>專屬禮遇</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-wrapper w2">
+                <div class="reward-card" onclick="alert('已領取 3.jpg 獎勵')">
+                    <img src="3.jpg" class="card-img" alt="獎勵2" onerror="this.src='https://via.placeholder.com/140x120?text=3.jpg'">
+                    <div class="card-content">
+                        <span class="coupon-label">犒賞 ‧ 貳</span>
+                        <h3 class="coupon-title">時空信物<br>現折禮券</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-wrapper w3">
+                <div class="reward-card" onclick="alert('已領取 4.jpg 獎勵')">
+                    <img src="4.jpg" class="card-img" alt="獎勵3" onerror="this.src='https://via.placeholder.com/140x120?text=4.jpg'">
+                    <div class="card-content">
+                        <span class="coupon-label">犒賞 ‧ 參</span>
+                        <h3 class="coupon-title">鏡海遺珍<br>精美贈品</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="footer-hint">
+            探尋者，這是屬於你的榮譽犒賞。<br>
+            撥動卡牌，收納「時空信物」至囊中。
+        </p>
+
+        <div class="seal-btn-container" onclick="location.href='6.html'">
+            <div class="seal-btn">再啟<br>征途</div>
+        </div>
+    </div>
+
+</body>
+</html>
